@@ -15,7 +15,7 @@ This project fetches financial data (Balance Sheet, Profit & Loss, Cash Flow) fr
 ## 🏗️ Architecture
 
 ```
-mashruf-assign/
+project-root/
 ├── backend_ml/          # Python ML Analysis Engine
 │   ├── data/           # Input data and SSL certs
 │   ├── logs/           # Process logs
