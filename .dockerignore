@@ -1,0 +1,9 @@
+backend_ml/__pycache__
+backend_ml/venv
+backend_ml/.env
+.git
+.gitignore
+backend_ml/data/
+backend_ml/logs/
+*.pyc
+frontend_web/
