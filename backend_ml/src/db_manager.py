@@ -5,6 +5,7 @@ from datetime import datetime
 from .config import Config
 import logging
 import math
+import os
 
 Base = declarative_base()
 
@@ -29,13 +30,38 @@ class CompanyAnalysis(Base):
 
 class DBManager:
     def __init__(self):
+        # Ensure data directory exists
+        os.makedirs('data', exist_ok=True)
+        
+        ca_path = 'data/ca.pem'
+        
+        # Handle CA Certificate for Deployment
+        if not os.path.exists(ca_path):
+            # Try to get from environment variable
+            ca_content = os.getenv('DB_CA_PEM')
+            if ca_content:
+                # Fix newlines if they were escaped in the env var
+                ca_content = ca_content.replace('\\n', '\n')
+                with open(ca_path, 'w') as f:
+                    f.write(ca_content)
+                logging.info("Created ca.pem from environment variable")
+            else:
+                logging.warning("ca.pem not found and DB_CA_PEM not set. SSL connection might fail.")
+
         # SSL configuration for TiDB Cloud
         connect_args = {
             'ssl': {
-                'ca': 'data/ca.pem',  # Path to the downloaded CA certificate
-                'check_hostname': True  # Equivalent to ssl_mode=VERIFY_IDENTITY
+                'ca': ca_path,
+                'check_hostname': True
             }
         }
+        
+        # If ca.pem still doesn't exist (and wasn't created), we might want to disable SSL verify or let it fail
+        if not os.path.exists(ca_path):
+             logging.warning("Proceeding without specific CA bundle. System certs will be used if available.")
+             # Remove 'ca' from args if file doesn't exist to avoid FileNotFoundError in SQLAlchemy
+             del connect_args['ssl']['ca']
+
         self.engine = create_engine(Config.DB_URI, echo=False, connect_args=connect_args)
         self.Session = sessionmaker(bind=self.engine)
         # Create table if it doesn't exist (Safety feature)
