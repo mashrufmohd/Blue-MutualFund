@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: financial-analysis-ml
+    runtime: python
+    buildCommand: |
+      pip install --upgrade pip setuptools wheel cython ninja meson
+      pip install -r backend_ml/requirements.txt
+    startCommand: cd backend_ml && uvicorn api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.6
