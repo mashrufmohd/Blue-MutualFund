@@ -1,4 +1,4 @@
-pandas==2.2.0
+pandas>=2.2.3
 requests==2.31.0
 SQLAlchemy==2.0.25
 pymysql==1.1.0
