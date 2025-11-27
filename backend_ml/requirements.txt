@@ -8,3 +8,7 @@ tqdm==4.66.1
 cryptography==42.0.5
 fastapi==0.104.1
 uvicorn==0.24.0
+meson-python
+ninja
+cython
+numpy>=1.26.0
