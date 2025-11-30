@@ -41,6 +41,7 @@ frontend_web/.env.example
 .env.test.local
 .env.production.local
 *.env
+backend_ml/.env.example
 
 # Backend Specific
 backend_ml/logs/
