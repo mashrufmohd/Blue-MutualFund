@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend_ml
+    container_name: ml_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend_ml/.env
+    environment:
+      PORT: 8000
+    volumes:
+      - ./backend_ml/data:/app/data
+    restart: always
+
+  frontend:
+    build: ./frontend_web
+    container_name: ml_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: always

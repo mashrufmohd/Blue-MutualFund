@@ -4,7 +4,7 @@ Complete end-to-end financial analysis system for Nifty 100 companies with ML-po
 
 ## 🎯 Project Overview
 
-This project fetches financial data (Balance Sheet, Profit & Loss, Cash Flow) from the StockTicker API, performs machine learning operations to generate insights, and stores results in a MySQL database. Real-time analysis is displayed both in the terminal and via a modern web application.
+This project fetches financial data (Balance Sheet, Profit & Loss, Cash Flow) from the StockTicker API, performs machine learning operations to generate insights, and stores results in MongoDB Atlas. Real-time analysis is displayed both in the terminal and via a modern web application.
 
 ## 📊 Live Demo
 
@@ -17,7 +17,7 @@ This project fetches financial data (Balance Sheet, Profit & Loss, Cash Flow) fr
 ```
 project-root/
 ├── backend_ml/          # Python ML Analysis Engine
-│   ├── data/           # Input data and SSL certs
+│   ├── data/           # Input data (Excel) + cached artifacts
 │   ├── logs/           # Process logs
 │   ├── src/            # Core ML modules
 │   └── main.py         # Entry point
@@ -34,7 +34,7 @@ project-root/
 
 - Python 3.8+
 - Node.js 16+
-- MySQL/TiDB Cloud account
+- MongoDB Atlas cluster (connection string with write access)
 - VS Code (recommended)
 
 ### Backend Setup
@@ -46,6 +46,18 @@ venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 python main.py
 ```
+
+#### Windows quick-start command block (Python 3.11)
+
+If you're following the exact local setup from this repo and already have Python&nbsp;3.11 installed at `C:\Users\Mashr\AppData\Local\Programs\Python\Python311\python.exe`, you can bootstrap and launch the API with just two commands (run from the project root):
+
+```powershell
+cd c:\Users\Mashr\Financial-Analysis-ML
+C:\Users\Mashr\AppData\Local\Programs\Python\Python311\python.exe -m pip install -r backend_ml\requirements.txt
+C:\Users\Mashr\AppData\Local\Programs\Python\Python311\python.exe backend_ml\api.py
+```
+
+Leave the PowerShell window open to keep the server running. Hit `Ctrl+C` to stop it, and repeat only the second command for subsequent restarts.
 
 ### Frontend Setup
 
@@ -86,10 +98,10 @@ Access the app at `http://localhost:5173`
 
 ### ✅ Database
 
-- **TiDB Cloud MySQL**: Scalable cloud database
-- **SSL/TLS**: Secure connections
-- **Upsert Logic**: Update existing records
-- **Data Validation**: Sanitized inputs
+- **MongoDB Atlas**: Fully managed, globally available document DB
+- **TLS by default**: Secure connection strings from Atlas
+- **Idempotent Upserts**: `update_one(..., upsert=True)` to keep data fresh
+- **Data Validation**: Sanitized payloads prior to storage
 
 ## 🔬 ML Analysis Engine
 
@@ -161,20 +173,19 @@ curl "https://bluemutualfund.in/server/api/company.php?id=TCS&api_key=ghfkffu637
 }
 ```
 
-## 🗄️ Database Schema
+## 🗄️ MongoDB Document Shape
 
-```sql
-CREATE TABLE ml (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  company_id VARCHAR(50) UNIQUE NOT NULL,
-  company_name VARCHAR(255),
-  top_pros TEXT,              -- Pipe-delimited string
-  top_cons TEXT,              -- Pipe-delimited string
-  roe FLOAT,
-  sales_growth FLOAT,
-  profit_growth FLOAT,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+```json
+{
+  "company_id": "TCS",
+  "company_name": "Tata Consultancy Services",
+  "top_pros": "Company is almost debt-free.|Good ROE track record",
+  "top_cons": "Company is not paying out dividend",
+  "roe": 47.4,
+  "sales_growth": 28.3,
+  "profit_growth": 23.0,
+  "updated_at": ISODate("2025-11-30T06:45:12Z")
+}
 ```
 
 ## 🛠️ Tech Stack
@@ -182,8 +193,7 @@ CREATE TABLE ml (
 ### Backend
 - Python 3.11
 - Pandas 2.2.0
-- SQLAlchemy 2.0.25
-- PyMySQL 1.1.0
+- PyMongo 4.6
 - Requests 2.31.0
 - tqdm 4.66.1
 
@@ -197,9 +207,9 @@ CREATE TABLE ml (
 - Lucide React 0.294
 
 ### Database
-- TiDB Cloud (MySQL 8.0 compatible)
-- SSL/TLS encryption
-- Cloud-native scalability
+- MongoDB Atlas
+- TLS-only connection strings
+- Serverless & autoscaling clusters
 
 ## 📈 Workflow
 
@@ -235,9 +245,9 @@ CREATE TABLE ml (
 
 **Database Connection Failed**
 ```bash
-# Check credentials in src/config.py
-# Verify CA certificate in data/ca.pem
-# Whitelist IP in TiDB Cloud
+# Ensure MONGO_URI + MONGO_DB_NAME are set in backend_ml/.env
+# Confirm your IP (or VPC peering) is allowed in MongoDB Atlas Network Access
+# If using SRV connection strings, keep `mongodb+srv://` prefix intact
 ```
 
 **NaN Database Errors**
@@ -276,7 +286,7 @@ CREATE TABLE ml (
 - Document viewer
 
 ✅ **Database Integration**
-- MySQL schema
+- MongoDB collection design
 - Upsert operations
 - Data validation
 

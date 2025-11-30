@@ -15,7 +15,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -33,7 +32,30 @@ body {
   background: #2d3b55;
 }
 
-/* Glassmorphism Utilities */
+.financial-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 23, 42, 0.3) transparent;
+  padding-bottom: 0.5rem;
+}
+
+.financial-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.financial-scroll::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.9);
+  border-radius: 999px;
+}
+
+.financial-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #09102a, #1b2651);
+  border-radius: 999px;
+}
+
+.financial-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #1a2450, #2d3a70);
+}
+
 .glass-panel {
   background: rgba(17, 24, 40, 0.6);
   backdrop-filter: blur(12px);
@@ -55,20 +77,20 @@ body {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
-/* Text Gradients */
 .text-gradient-lime {
   background: linear-gradient(to right, #ccff00, #00f0ff);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-pink {
   background: linear-gradient(to right, #ff0099, #7000ff);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Animation Delays */
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }

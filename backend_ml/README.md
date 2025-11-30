@@ -2,14 +2,14 @@
 
 ## Project Overview
 
-This project fetches financial data (Balance Sheet, Profit & Loss, Cash Flow) from the StockTicker API, performs machine learning operations to generate insights, and stores results in a MySQL database. Real-time analysis is displayed in the terminal and on a web application for easy access and visualization.
+This project fetches financial data (Balance Sheet, Profit & Loss, Cash Flow) from the StockTicker API, performs machine learning operations to generate insights, and stores results in MongoDB Atlas. Real-time analysis is displayed in the terminal and on a web application for easy access and visualization.
 
 ## Tech Stack
 
 - **Programming Language**: Python 3.8+
-- **Database**: TiDB Cloud (MySQL Compatible)
+- **Database**: MongoDB Atlas
 - **Tools**: VS Code
-- **Packages**: Pandas, Requests, SQLAlchemy, PyMySQL, openpyxl, tqdm
+- **Packages**: Pandas, Requests, PyMongo, openpyxl, tqdm
 - **Frontend Web App**: React + Vite + Redux Toolkit + Tailwind CSS
 
 ## API Documentation
@@ -52,8 +52,9 @@ https://bluemutualfund.in/server/api/company.php?id=TCS&api_key=ghfkffu637838282
    ```
 
 5. **Configure database**
-   - Update `src/config.py` with your TiDB Cloud credentials
-   - Download CA certificate and place in `data/ca.pem`
+   - Open `backend_ml/.env` and set `MONGO_URI`, `MONGO_DB_NAME`, `MONGO_COLLECTION`
+   - Ensure the Atlas connection string is URL-encoded (Atlas does this automatically—copy it directly from the UI; if your password contains characters like `@` or `#`, replace them with `%40`, `%23`, etc.)
+   - In MongoDB Atlas, add your current IP (or VPC) under *Network Access*
 
 6. **Add company data**
    - Place `Nifty100Companies.xlsx` in the `data/` folder
@@ -131,20 +132,19 @@ The system selects **top 3 pros and cons** based on priority scoring.
 
 ### 4. Database Storage
 
-Results are stored in the `ml` table with the following schema:
+Results are stored in the `ml_analysis` MongoDB collection using documents like:
 
-```sql
-CREATE TABLE ml (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  company_id VARCHAR(50) UNIQUE NOT NULL,
-  company_name VARCHAR(255),
-  top_pros TEXT,
-  top_cons TEXT,
-  roe FLOAT,
-  sales_growth FLOAT,
-  profit_growth FLOAT,
-  updated_at DATETIME
-);
+```json
+{
+   "company_id": "HDFCBANK",
+   "company_name": "HDFC Bank",
+   "top_pros": "Company is almost debt-free.|Good ROE track record",
+   "top_cons": "Company has low return on equity of 8.33% over last 3 years",
+   "roe": 18.5,
+   "sales_growth": 22.1,
+   "profit_growth": 19.7,
+   "updated_at": ISODate("2025-11-30T06:18:00Z")
+}
 ```
 
 ### 5. Real-Time Display
@@ -172,8 +172,8 @@ CREATE TABLE ml (
 - Responsive design with Tailwind CSS
 
 ✅ **Database Integration**
-- TiDB Cloud MySQL connectivity
-- SSL/TLS encryption
+- MongoDB Atlas connectivity
+- TLS-only SRV connection strings
 - Upsert operations (update if exists)
 - Data validation and sanitization
 
@@ -182,14 +182,13 @@ CREATE TABLE ml (
 ```
 backend_ml/
 ├── data/
-│   ├── Nifty100Companies.xlsx
-│   └── ca.pem
+│   └── Nifty100Companies.xlsx
 ├── logs/
 │   └── process.log
 ├── src/
 │   ├── __init__.py
 │   ├── config.py          # API keys, DB credentials, thresholds
-│   ├── db_manager.py      # SQLAlchemy models and operations
+│   ├── db_manager.py      # MongoDB data access layer
 │   ├── fetcher.py         # API data fetching with retry logic
 │   └── processor.py       # ML analysis engine
 ├── main.py                # Entry point
@@ -227,10 +226,10 @@ frontend_web/
 
 ### Backend Issues
 
-**MySQL Connection Error**
-- Verify TiDB Cloud credentials in `src/config.py`
-- Ensure CA certificate is in `data/ca.pem`
-- Check IP whitelist in TiDB Cloud dashboard
+**MongoDB Connection Error**
+- Verify `MONGO_URI`, `MONGO_DB_NAME`, and `MONGO_COLLECTION` in `.env`
+- Confirm your Atlas project allows the current IP (Settings ➜ Network Access)
+- Ensure the SRV URI includes the target database or set `MONGO_DB_NAME`
 
 **NaN/Inf Database Errors**
 - Fixed in latest version with math.isnan() checks
@@ -255,7 +254,7 @@ frontend_web/
 
 1. ✅ Implement Python scripts for API fetching and ML operations
 2. ✅ Develop web interface for real-time analysis monitoring
-3. ✅ Database integration with MySQL storage
+3. ✅ Database integration with MongoDB Atlas storage
 4. 🔄 Optimize ML models for accurate financial forecasting
 5. 🔄 Add comparison features for multiple companies
 6. 🔄 Implement caching for frequently accessed data

@@ -7,3 +7,4 @@ backend_ml/data/
 backend_ml/logs/
 *.pyc
 frontend_web/
+frontend_web/.env

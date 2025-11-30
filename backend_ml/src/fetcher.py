@@ -28,7 +28,6 @@ class DataFetcher:
                 if response.status_code == 200:
                     try:
                         data = response.json()
-                        # Basic validation to check if data exists
                         if not data or 'data' not in data:
                             raise ValueError("Empty or Invalid JSON structure")
                         return data
@@ -36,7 +35,6 @@ class DataFetcher:
                         logging.warning(f"Invalid JSON received for {company_id}")
                         return None
                 elif response.status_code == 429:
-                    # Rate limited
                     time.sleep(2 ** attempt)
                 else:
                     logging.error(f"API Error {response.status_code} for {company_id}")

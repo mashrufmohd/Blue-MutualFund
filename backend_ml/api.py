@@ -12,7 +12,6 @@ from src.config import Config
 
 app = FastAPI(title="ML Financial Analysis API", version="1.0.0")
 
-# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,7 +28,6 @@ async def get_company_analysis(company_id: str):
     Fetch company data from external API and merge with ML insights from DB.
     """
     try:
-        # 1. Fetch from external StockTicker API
         external_url = Config.API_BASE_URL
         params = {
             'id': company_id,
@@ -40,28 +38,26 @@ async def get_company_analysis(company_id: str):
         response.raise_for_status()
         api_data = response.json()
         
-        # 2. Fetch ML insights from our database
         ml_insights = db_manager.get_analysis(company_id)
-        
-        # 3. Merge ML insights into response
+    
         if ml_insights and api_data.get('data'):
-            # Convert pipe-delimited strings to array format
             pros_list = []
             cons_list = []
             
-            if ml_insights.top_pros:
-                pros_list = [{'pros': p.strip()} for p in ml_insights.top_pros.split('|') if p.strip()]
-            
-            if ml_insights.top_cons:
-                cons_list = [{'cons': c.strip()} for c in ml_insights.top_cons.split('|') if c.strip()]
-            
-            # Replace original prosandcons with ML-generated insights
+            top_pros = ml_insights.get('top_pros') if isinstance(ml_insights, dict) else None
+            top_cons = ml_insights.get('top_cons') if isinstance(ml_insights, dict) else None
+
+            if top_pros:
+                pros_list = [{'pros': p.strip()} for p in top_pros.split('|') if p.strip()]
+        
+            if top_cons:
+                cons_list = [{'cons': c.strip()} for c in top_cons.split('|') if c.strip()]
+        
             api_data['data']['prosandcons'] = pros_list + cons_list
-            
-            # Add ML metrics to company object
-            api_data['company']['ml_sales_growth'] = ml_insights.sales_growth
-            api_data['company']['ml_profit_growth'] = ml_insights.profit_growth
-            api_data['company']['ml_roe'] = ml_insights.roe
+        
+            api_data['company']['ml_sales_growth'] = ml_insights.get('sales_growth', 0)
+            api_data['company']['ml_profit_growth'] = ml_insights.get('profit_growth', 0)
+            api_data['company']['ml_roe'] = ml_insights.get('roe', 0)
         
         return api_data
     

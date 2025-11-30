@@ -28,6 +28,7 @@ dist/
 build/
 .next/
 out/
+frontend_web/.env
 
 # Environment Variables (Sensitive)
 .env
@@ -41,7 +42,9 @@ out/
 # Backend Specific
 backend_ml/logs/
 backend_ml/data/*.pem
+backend_ml/data/*.db
 *.pem
+backend_ml/.env
 
 # OS Generated
 Thumbs.db

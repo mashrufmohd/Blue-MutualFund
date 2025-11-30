@@ -14,13 +14,11 @@ class MLProcessor:
         
         company_id = company_meta.get('id')
         
-        # 1. Convert lists to DataFrames for analysis
         df_pl = pd.DataFrame(financial_data.get('profitandloss', []))
         df_bs = pd.DataFrame(financial_data.get('balancesheet', []))
         
-        # 2. Run Analysis with priority scoring
-        pros = []  # List of tuples: (priority, message)
-        cons = []  # List of tuples: (priority, message)
+        pros = []
+        cons = []
         metrics = {}
 
         if not df_pl.empty:
@@ -30,10 +28,8 @@ class MLProcessor:
         if not df_bs.empty:
             self._analyze_debt(df_bs, pros, cons)
             
-        # 3. Analyze ROE (from meta or calculated)
         self._analyze_roe(company_meta, pros, cons, metrics)
 
-        # 4. Sort by priority and Select Top 3
         pros.sort(key=lambda x: x[0], reverse=True)
         cons.sort(key=lambda x: x[0], reverse=True)
         
@@ -43,7 +39,7 @@ class MLProcessor:
         return {
             "company_id": company_id,
             "company_name": company_meta.get('company_name'),
-            "top_pros": "|".join(final_pros), # Delimiter for DB
+            "top_pros": "|".join(final_pros),
             "top_cons": "|".join(final_cons),
             "roe": metrics.get('roe', 0),
             "sales_growth": metrics.get('sales_growth', 0),
@@ -54,7 +50,6 @@ class MLProcessor:
         """Analyze Sales and Profit Growth for multiple time periods"""
         metrics = {}
         try:
-            # Clean data
             df['sales'] = pd.to_numeric(df['sales'], errors='coerce')
             df['net_profit'] = pd.to_numeric(df['net_profit'], errors='coerce')
             df = df.dropna(subset=['sales', 'net_profit'])
@@ -62,7 +57,6 @@ class MLProcessor:
             if len(df) < 2:
                 return metrics
 
-            # Calculate growth for different periods: 3, 5, 10 years
             periods = [
                 (3, 3 if len(df) >= 4 else None),
                 (5, 5 if len(df) >= 6 else None),
@@ -79,21 +73,18 @@ class MLProcessor:
                     
                 oldest = df.iloc[-(period + 1)]
                 
-                # Sales Growth
                 if oldest['sales'] > 0:
                     sales_cagr = ((latest['sales'] / oldest['sales']) ** (1/period) - 1) * 100
                     if not math.isnan(sales_cagr) and not math.isinf(sales_cagr):
                         if best_sales_growth is None or abs(sales_cagr) > abs(best_sales_growth[1]):
                             best_sales_growth = (label, sales_cagr)
                 
-                # Profit Growth
                 if oldest['net_profit'] > 0 and latest['net_profit'] > 0:
                     profit_cagr = ((latest['net_profit'] / oldest['net_profit']) ** (1/period) - 1) * 100
                     if not math.isnan(profit_cagr) and not math.isinf(profit_cagr):
                         if best_profit_growth is None or abs(profit_cagr) > abs(best_profit_growth[1]):
                             best_profit_growth = (label, profit_cagr)
 
-            # Store metrics and generate insights
             if best_sales_growth:
                 years, sales_cagr = best_sales_growth
                 metrics['sales_growth'] = round(sales_cagr, 2)
@@ -124,9 +115,8 @@ class MLProcessor:
             latest_debt = df.iloc[-1]['borrowings']
             
             if latest_debt <= Config.DEBT_FREE_LIMIT:
-                pros.append((100, "Company is almost debt-free."))  # Highest priority
+                pros.append((100, "Company is almost debt-free."))
             elif len(df) >= 2:
-                # Check trend (is debt reducing?)
                 prev_debt = df.iloc[-2]['borrowings']
                 if latest_debt < prev_debt:
                     pros.append((70, "Company has reduced debt."))
@@ -136,7 +126,6 @@ class MLProcessor:
     def _analyze_roe(self, meta, pros, cons, metrics):
         """Analyze Return on Equity for different time periods"""
         try:
-            # Check for 3-year ROE (priority)
             roe_3y = float(meta.get('roe_3_years', meta.get('roe_percentage', 0)))
             roe_5y = float(meta.get('roe_5_years', 0))
             

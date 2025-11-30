@@ -1,43 +1,62 @@
 import React from 'react';
 
-const FinancialTable = ({ data, title }) => {
-  if (!data || data.length === 0) return (
-    <div className="text-center py-12 text-gray-500 font-mono text-sm">NO DATA AVAILABLE FOR THIS METRIC</div>
-  );
+const FinancialTable = ({ data }) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className="text-center py-12 text-gray-500 font-mono text-sm">
+        NO DATA AVAILABLE FOR THIS METRIC
+      </div>
+    );
+  }
 
-  // Extract headers dynamically, excluding ID fields
-  const headers = Object.keys(data[0]).filter(k => !['id', 'company_id'].includes(k));
-  
-  // Show only last 5 entries (Years)
+  const headers = Object.keys(data[0]).filter((key) => !['id', 'company_id'].includes(key));
   const displayData = data.slice(-5);
 
   return (
-    <div className="overflow-x-auto custom-scrollbar">
-      <table className="w-full text-sm text-left border-collapse">
-        <thead className="text-xs text-gray-400 uppercase bg-white/5 border-b border-white/10">
-          <tr>
-            {headers.map(h => (
-              <th key={h} className="px-6 py-4 whitespace-nowrap font-mono tracking-wider first:sticky first:left-0 first:bg-midnight-800 first:z-10">
-                {h.replace(/_/g, ' ')}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-white/5">
-          {displayData.map((row, i) => (
-            <tr key={i} className="hover:bg-white/5 transition-colors group">
-              {headers.map((h, idx) => (
-                <td 
-                  key={h} 
-                  className={`px-6 py-4 whitespace-nowrap font-mono text-gray-300 group-hover:text-white transition-colors ${idx === 0 ? 'sticky left-0 bg-midnight-800 z-10 group-hover:bg-midnight-700' : ''}`}
+    <div className="rounded-[32px] border border-slate-200 bg-gradient-to-b from-white to-slate-50 shadow-sm overflow-hidden">
+      <div className="financial-scroll overflow-x-auto bg-white">
+        <table className="w-full min-w-[960px] border-separate border-spacing-0 text-sm text-left">
+          <thead className="text-[11px] font-semibold uppercase tracking-[0.4em] text-slate-500 bg-slate-50">
+            <tr>
+              {headers.map((header, idx) => (
+                <th
+                  key={header}
+                  className={`px-5 py-4 whitespace-nowrap ${
+                    idx === 0
+                      ? 'sticky left-0 z-20 bg-[#070b1e] text-white rounded-tl-[32px]'
+                      : 'bg-slate-50'
+                  }`}
                 >
-                  {row[h]}
-                </td>
+                  {header.replace(/_/g, ' ')}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {displayData.map((row, rowIdx) => (
+              <tr
+                key={rowIdx}
+                className="border-b border-slate-100 last:border-b-0 odd:bg-white even:bg-slate-50/60 hover:bg-indigo-50/40 transition-colors"
+              >
+                {headers.map((header, colIdx) => (
+                  <td
+                    key={`${header}-${rowIdx}`}
+                    className={`px-5 py-4 whitespace-nowrap font-semibold ${
+                      colIdx === 0
+                        ? `sticky left-0 z-10 bg-[#070b1e] text-white tracking-[0.2em] ${
+                            rowIdx === displayData.length - 1 ? 'rounded-bl-[32px]' : ''
+                          }`
+                        : 'text-right text-slate-700'
+                    }`}
+                  >
+                    {row[header] ?? '—'}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
