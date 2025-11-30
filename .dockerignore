@@ -1,6 +1,13 @@
 backend_ml/__pycache__
 backend_ml/venv
 backend_ml/.env
+backend_ml/data/*.db
+backend_ml/data/*.pem
+backend_ml/.env.local
+backend_ml/.env.development.local
+backend_ml/.env.test.local
+backend_ml/.env.production.local
+backend_ml/.env.example
 .git
 .gitignore
 backend_ml/data/
@@ -8,3 +15,7 @@ backend_ml/logs/
 *.pyc
 frontend_web/
 frontend_web/.env
+frontend_web/.env.local
+frontend_web/.env.development.local
+frontend_web/.env.test.local    
+frontend_web/.env.example

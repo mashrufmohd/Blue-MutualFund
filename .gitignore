@@ -29,6 +29,10 @@ build/
 .next/
 out/
 frontend_web/.env
+frontend_web/.env.local
+frontend_web/.env.development.local
+frontend_web/.env.test.local
+frontend_web/.env.example
 
 # Environment Variables (Sensitive)
 .env
@@ -45,6 +49,7 @@ backend_ml/data/*.pem
 backend_ml/data/*.db
 *.pem
 backend_ml/.env
+data/*.pem
 
 # OS Generated
 Thumbs.db
